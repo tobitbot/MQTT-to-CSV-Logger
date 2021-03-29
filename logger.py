@@ -37,6 +37,11 @@ def on_connect(client, userdata, flags, rc):
     if rc == 0:
         print("Successfully connected to broker " + defaults["broker"] + ":" + str(defaults["port"])
             + " on topic \"" + defaults["topic"] + "\" with code:" + str(rc))
+
+        with open(defaults["logFile"], "a", newline="") as file:
+            writer = csv.writer(file, quotechar="|", delimiter=";")
+            writer.writerow(["Connected to: " + defaults["broker"] + ":" + str(defaults["port"]), datetime.now()])
+
     else:
         print("Could not connect to to broker, code: " + str(rc))
     client.subscribe(str(defaults["topic"]))
