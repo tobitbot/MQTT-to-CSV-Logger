@@ -3,6 +3,7 @@ import csv
 import sys
 import argparse
 import atexit
+import time
 from datetime import datetime
 
 # Define some defaults
@@ -55,8 +56,8 @@ print(str(defaults) + "\n")
 
 def exit_handler():
     print("\nLogged MQTT traffic to log file: " + defaults["logFile"])
-    print("Bye bye... \n")
-
+    print("Program exit in 3 seconds. Bye bye... \n")
+    time.sleep(3)
 
 atexit.register(exit_handler)
 
