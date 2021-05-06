@@ -8,7 +8,7 @@ from datetime import datetime
 
 # Define some defaults
 defaults = {
-    "broker-IP": "localhost",
+    "broker_IP": "localhost",
     "port": 1883,
     "keepalive": 60,
     "topic": "application/#",
@@ -64,12 +64,12 @@ atexit.register(exit_handler)
 # Define MQTT functions
 def on_connect(client, userdata, flags, rc):
     if rc == 0:
-        print("Successfully connected to broker " + defaults["broker-IP"] + ":" + str(defaults["port"])
+        print("Successfully connected to broker " + defaults["broker_IP"] + ":" + str(defaults["port"])
             + " on topic \"" + defaults["topic"] + "\" with code:" + str(rc))
 
         with open(defaults["logFile"], "a", newline="") as file:
             writer = csv.writer(file, quotechar="|", delimiter=";")
-            writer.writerow([datetime.now(), defaults["topic"], "Connected to: " + defaults["broker-IP"] + ":" + str(defaults["port"]), ])
+            writer.writerow([datetime.now(), defaults["topic"], "Connected to: " + defaults["broker_IP"] + ":" + str(defaults["port"]), ])
     else:
         print("Could not connect to to broker, code: " + str(rc))
     client.subscribe(str(defaults["topic"]))
@@ -82,14 +82,26 @@ def on_message(client, userdate, msg):
         writer = csv.writer(file, quotechar="|", delimiter=";")
         writer.writerow(data)
 
-# Init MQTT-Connection
-mqttc = mqtt.Client()
-mqttc.on_connect = on_connect
-mqttc.on_message = on_message
-mqttc.connect(str(defaults["broker-IP"]), int(defaults["port"]), int(defaults["keepalive"]))
 
-if defaults["username"] != None or defaults["password"]!= None:
-    mqttc.username_pw_set(str(defaults["username"]), str(defaults["password"]))
+def initConnection():
+    try:
+        # Init MQTT-Connection
+        mqttc = mqtt.Client()
+        mqttc.on_connect = on_connect
+        mqttc.on_message = on_message
+        mqttc.connect(str(defaults["broker_IP"]), int(defaults["port"]), int(defaults["keepalive"]))
 
-print("Starting MQTT logging...")
-mqttc.loop_forever()
+        if defaults["username"] != None or defaults["password"]!= None:
+            mqttc.username_pw_set(str(defaults["username"]), str(defaults["password"]))
+
+        print("Starting MQTT logging...")
+        mqttc.loop_forever()
+
+    except UnicodeDecodeError:
+        print("Unicode Error. Connection again")
+        initConnection()
+
+    finally:
+        print("Tschöö")
+
+initConnection()
